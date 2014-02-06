@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="arnotes">
+<head>
+    <meta charset="utf-8">
+    <title>Arnotes | Fastest way of managing notes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+	<link href="css/page.css" rel="stylesheet">
+    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="lib/todc-bootstrap/css/todc.bootstrap.css" rel="stylesheet">
+	<link href="lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+	<script src="lib/angular/js/angular.min.js"></script>
+	<script src="js/app.js"></script>
+	<script src="js/arnotesStorage.js"></script>
+	<script src="js/idService.js"></script>
+	<script src="js/arnotesCtrl.js"></script>
+</head>
+<body ng-controller="ArnotesCtrl">
+    <div class="navbar navbar-googlebar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container-fluid">
+                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+                <a class="brand" href="#">Arnotes</a>
+                <div class="nav-collapse collapse navbar-responsive-collapse">
+					<ul class="nav">
+						<li ng-class="{active: location.path() == '/'}"><a href="/">Home</a></li>
+					</ul>
+					<form class="navbar-form pull-left" ng-submit="search()">
+						<input type="text" ng-model="searchQuery" class="span4" placeholder="Search notes">
+						<button class="btn btn-primary" type="submit">
+							<i class="icon-search icon-white"></i>
+						</button>
+					</form>
+					<ul class="nav pull-right">
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+								<i class="icon-cog"></i> <b class="caret"></b>
+							</a>
+							<ul class="dropdown-menu">
+								<li class="nav-header">Action</li>
+								<li><a href="#"><i class="icon-download-alt"></i> Import</a></li>
+								<li><a href="#"><i class="icon-upload-alt"></i> Export</a></li>
+							</ul>
+						</li>
+						
+					</ul>
+                </div> <!-- .nav-collapse -->
+            </div>
+        </div>
+    </div>
+
+    <div id="wrapper" class="container-fluid">
+        <section id="section-wrapper">
+            <div id="tab-wrapper" class="tabbable">
+                <ul id="main-tab" class="nav nav-tabs">
+					<li class="active"><a href="#home" data-toggle="tab"><i class="icon-home"></i> Home</a></li>
+					<li><a href="#new" data-toggle="tab"><i class="icon-plus"></i> New Note</a></li>
+				</ul>
+				<div id="content-wrapper" class="tab-content">
+					<div class="tab-pane active" id="home">
+						<div class="row-fluid">
+							<div class="span3 well well-small">
+								<ul class="nav nav-list">
+									<li class="nav-header">Recent Files</li>
+									<p>No recent files.</p>
+								</ul>
+							</div>
+							
+							<div class="span8">
+								<div class="row-fluid">
+									<h3 class="pane-header">Notebook 
+										<div class="pull-right">
+											<a href="#" class="btn btn-danger">Add Notebook</a>
+										</div>
+									</h3>
+									<p>You have no notebook in your library. Click <a href="#">here</a> to add one.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="tab-pane note-pane" id="new">
+						<div class="well well-small">
+							<div class="btn-group">
+								<a href="#" class="btn btn-small"><i class="icon-file"></i> New</a>
+								<a href="#" class="btn btn-small"><i class="icon-remove-sign"></i> Close</a>
+							</div>
+							<div class="btn-group">
+								<a href="#" class="btn btn-small"><i class="icon-folder-open"></i> Open</a>
+								<a href="#saveDialog" class="btn btn-small" data-toggle="modal"><i class="icon-save"></i> Save</a>
+								<a href="#saveDialog" class="btn btn-small" data-toggle="modal"><i class="icon-save"></i> Save As</a>
+							</div>
+							<div class="btn-group">
+								<a href="#listImage" class="btn btn-small" data-toggle="modal"><i class="icon-picture"></i> Add Image</a>
+							</div>
+							<div class="btn-group">
+								<a href="#" class="btn btn-small" onclick="compile()"><i class="icon-play"></i> Compile</a>
+							</div>
+							<div class="pull-right">
+								<span class="navbar-text"> <strong>Last Modified:</strong> 2013-03-22 09:28</span>
+							</div>
+						</div>
+						<div class="row-fluid notes-wrapper">
+							<div class="span5 note-column">
+								<div id="new_text" class="note-text"></div>
+							</div>
+							<div class="span7 note-column">
+								<div id="new_preview" class="note-preview"></div>
+							</div>
+						</div>
+						<div class="note-status">
+							<div id="new_status"><strong>Processing time:</strong> 0 ms</div>
+						</div>
+					</div>
+		
+				</div>
+            </div>
+        </section>
+
+        <footer id="footer-wrapper">
+            <p class="pull-right">art4melody</p>
+            <p class="muted">&copy; March 2013</p>
+        </footer>
+
+    </div> <!-- container -->
+	
+	<div id="listImage" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="listImageHeader" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3 id="listImageHeader">
+				Add Image
+				<div class="pull-right" style="margin-right:20px">
+					<a class="btn btn-primary" role="button" data-toggle="modal" href="#uploadImage" data-dismiss="modal" aria-hidden="true" ng-click="resetImageUpload()">Upload Image</a>
+				</div>
+			</h3>
+		</div>
+		<div class="modal-body">
+			<p ng-hide="images.length>0">There is no images yet. Please upload one.</p>
+			<div class="media image-list" ng-repeat="img in images" ng-click="insertImage(img)">
+				<a class="pull-left" href="#">
+					<img class="media-object" ng-src="{{img.data}}" style="max-width:64px;max-height:64px;">
+				</a>
+				<a href="#" class="close" ng-click="deleteImage(img);$event.stopPropagation();">&times;</a>
+				<div class="media-body">
+					<h4 class="media-heading">{{img.name}}</h4>
+					<p>{{img.description}}</p>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<a class="btn" data-dismiss="modal" aria-hidden="true">Close</a>
+		</div>
+	</div>
+	
+	<div id="uploadImage" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="uploadImageHeader" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3 id="uploadImageHeader">Upload Image</h3>
+		</div>
+		<div class="modal-body">
+			<form class="form-horizontal">
+				<div class="control-group">
+				    <label class="control-label" for="inputImageName">Name</label>
+				    <div class="controls">
+				      <input type="text" id="inputImageName" name="inputImageName" placeholder="Name" ng-model="uploadImage.name">
+				    </div>
+				</div>
+				<div class="control-group">
+				    <label class="control-label" for="inputImageDesc">Description</label>
+				    <div class="controls">
+				      <input type="text" id="inputImageDesc" name="inputImageDesc" placeholder="Description" ng-model="uploadImage.description">
+				    </div>
+				</div>
+				<div class="control-group">
+				    <label class="control-label">
+				    	<img ng-hide="uploadImage.data" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACDUlEQVR4Xu2Yz6/BQBDHpxoEcfTjVBVx4yjEv+/EQdwa14pTE04OBO+92WSavqoXOuFp+u1JY3d29rvfmQ9r7Xa7L8rxY0EAOAAlgB6Q4x5IaIKgACgACoACoECOFQAGgUFgEBgEBnMMAfwZAgaBQWAQGAQGgcEcK6DG4Pl8ptlsRpfLxcjYarVoOBz+knSz2dB6vU78Lkn7V8S8d8YqAa7XK83ncyoUCjQej2m5XNIPVmkwGFC73TZrypjD4fCQAK+I+ZfBVQLwZlerFXU6Her1eonreJ5HQRAQn2qj0TDukHm1Ws0Ix2O2260RrlQqpYqZtopVAoi1y+UyHY9Hk0O32w3FkI06jkO+74cC8Dh2y36/p8lkQovFgqrVqhFDEzONCCoB5OSk7qMl0Gw2w/Lo9/vmVMUBnGi0zi3Loul0SpVKJXRDmphvF0BOS049+n46nW5sHRVAXMAuiTZObcxnRVA5IN4DJHnXdU3dc+OLP/V63Vhd5haLRVM+0jg1MZ/dPI9XCZDUsbmuxc6SkGxKHCDzGJ2j0cj0A/7Mwti2fUOWR2Km2bxagHgt83sUgfcEkN4RLx0phfjvgEdi/psAaRf+lHmqEviUTWjygAC4EcKNEG6EcCOk6aJZnwsKgAKgACgACmS9k2vyBwVAAVAAFAAFNF0063NBAVAAFAAFQIGsd3JN/qBA3inwDTUHcp+19ttaAAAAAElFTkSuQmCC" style="max-width:64px;max-height:64px;">
+				    	<img ng-show="uploadImage.data" ng-src="{{uploadImage.data}}" style="max-width:64px;max-height:64px;">
+				    </label>
+				    <div class="controls">
+				    	<input type="file" id="inputImage" name="inputImage" accept="image/*" onchange="angular.element(this).scope().imageSelect(this)" />
+				    </div>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<a class="btn" data-dismiss="modal" aria-hidden="true">Close</a>
+			<a class="btn btn-primary" role="button" data-toggle="modal" href="#listImage" data-dismiss="modal" aria-hidden="true" ng-click="addImage()">Add Image</a>
+		</div>
+	</div>
+	
+	<div id="saveDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="saveDialogHeader" aria-hidden="true">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			<h3 id="saveDialogHeader">Save As</h3>
+		</div>
+		<div class="modal-body">
+			<input type="text" class="input-block-level" placeholder="Enter Filename">
+		</div>
+		<div class="modal-footer">
+			<a class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a>
+			<a class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Save</a>
+		</div>
+	</div>
+
+    <script src="lib/jquery/js/jquery-1.9.1.min.js"></script>
+    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+	<script src="lib/jquery-ui/js/jquery-ui.min.js"></script>
+	<script src="lib/jquery-ui/js/jquery.ui.draggable.min.js"></script>
+	<script src="lib/slimscroll/js/jquery.slimscroll.min.js"></script>
+	<script src="lib/showdown/js/showdown.js"></script>
+	<script src="lib/marked/js/marked.js"></script>
+	<script src="lib/ace/js/ace.js"></script>
+	<script src="lib/ace/js/theme-chrome.js"></script>
+	<script src="lib/ace/js/mode-markdown.js"></script>
+	<script src="lib/holder/js/holder.js"></script>
+	<script src="js/page.js"></script>
+</body>
+</html>
